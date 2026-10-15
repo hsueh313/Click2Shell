@@ -1,0 +1,60 @@
+# Click2Shell WordPress 6.4.3 離線環境
+# 啟動前先載入映像：docker load -i images/click2shell-images.tar.gz
+# 啟動：docker compose up -d
+name: click2shell
+
+services:
+  db:
+    image: mysql:5.7
+    pull_policy: never   # 只用本地映像，不從網路下載
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      # 用 TCP 檢查：MySQL 首次初始化時的暫時伺服器不開網路，只有正式伺服器連得上
+      test: ["CMD", "mysql", "-h127.0.0.1", "-uwordpress", "-pwordpress", "-e", "SELECT 1"]
+      interval: 3s
+      timeout: 5s
+      retries: 60
+    restart: unless-stopped
+
+  wordpress:
+    image: click2shell-wordpress:6.4.3
+    pull_policy: never   # 只用本地映像，不從網路下載
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      # 鎖定版本：只關閉自動更新
+      WORDPRESS_CONFIG_EXTRA: |
+        define('AUTOMATIC_UPDATER_DISABLED', true);
+        define('WP_AUTO_UPDATE_CORE', false);
+    volumes:
+      - wordpress_data:/var/www/html
+    configs:
+      - source: php_uploads
+        target: /usr/local/etc/php/conf.d/uploads.ini
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+configs:
+  # PHP 上傳上限（預設 2M，主題 zip 2.8MB 無法從後台上傳）
+  php_uploads:
+    content: |
+      upload_max_filesize = 64M
+      post_max_size = 64M
+
+volumes:
+  db_data:
+  wordpress_data:
