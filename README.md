@@ -61,7 +61,7 @@ docker compose up -d                             # 啟動
 python3 -m http.server 8000
 ```
 
-管理員連線 http://<IP>:8000，點擊 `Click2Shell-POC.html`。
+管理員連線 `http://<IP>:8000`，點擊 `Click2Shell-POC.html`。
 
 點擊後等待約10秒會顯示成功。
 
