@@ -84,11 +84,9 @@ http://<IP>:8080/wp-content/plugins/mrz-marker/mrz-marker.php?mrz_cmd=cat%20/etc
 </p>
 
 <p align="center">
-  <a href="https://youtu.be/fn-CcS_wJjg">
-    <img src="https://img.youtube.com/vi/fn-CcS_wJjg/hqdefault.jpg" alt="點擊觀看影片" width="600">
-  </a>
+  <video src="docs/images/Click2Shell-POC.mp4" width="600" autoplay loop muted playsinline></video>
   <br>
-  <em>點擊圖片觀看完整展示影片</em>
+  <em>完整示範影片</em>
 </p>
 
 ## POC 手動安裝離線主題
