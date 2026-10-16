@@ -84,7 +84,7 @@ http://<IP>:8080/wp-content/plugins/mrz-marker/mrz-marker.php?mrz_cmd=cat%20/etc
 </p>
 
 <p align="center">
-  <video src="docs/images/Click2Shell-POC.mp4" width="600" autoplay loop muted playsinline></video>
+  <img src="docs/images/Click2Shell-POC.gif" alt="完整示範影片" width="600">
   <br>
   <em>完整示範影片</em>
 </p>
